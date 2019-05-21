@@ -1,5 +1,30 @@
-build:
-  image: python:3.6
-  commands:
-    - pip install mkdocs
-    - mkdocs gh-deploy
+kind: pipeline
+name: default
+
+steps:
+  - name: build
+    image: python:3.6-alpine
+    environment:
+      DEPLOY_SECRET_KEY:
+        from_secret: DEPLOY_SECRET_KEY
+    commands:
+      - apk update
+      - apk add --no-chache git-fast-import openssh
+      # change git config to use ssh auth instead of https on github:
+      - git config --global url."git@github.com:".insteadOf "https://github.com/"
+      # create ssh dir for keys:
+      - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+      - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      # create secret key from drone secret and add it:
+      - chmod 600 deploykey
+      - echo "$DEPLOY_SECRET_KEY" > deploykey
+      - chmod 400 deploykey
+      - eval $(ssh-agent -s)
+      - ssh-add deploykey
+      # update git repo, fetch the deploy branch:
+      - git fetch origin gh-pages
+      # install mkdocs module for python:
+      - pip install --upgrade pip setuptools wheel
+      - pip install mkdocs
+      # build and publish:
+      - mkdocs gh-deploy
