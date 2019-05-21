@@ -1,0 +1,4 @@
+# DO NOT ADD YOUR SECRET KEY HERE!
+# to be overwritten with drone secret
+# we do not want the secret key in the repo
+# we use a drone secret for that!
