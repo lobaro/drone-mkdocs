@@ -25,6 +25,6 @@ steps:
       - git fetch origin gh-pages
       # install mkdocs module for python:
       - pip install --upgrade pip setuptools wheel
-      - pip install mkdocs
+      - pip install -r requirements.txt
       # build and publish:
       - mkdocs gh-deploy
